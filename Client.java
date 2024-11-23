@@ -3,6 +3,44 @@ import java.net.*;
 import java.util.Scanner;
 
 public class Client {
+
+    // Provide a list of all possible commands
+    private static void printHelpMessage() {
+        String helpMessage = "Commands:\n" + "%connect - Connect to a server\n" + "%exit - Disconnect from the server\n"
+            + "%join - Join a single message board\n" + "%post - Post a message to a message board\n"
+            + "%users - View a list of all users in a group\n" + "%leave - Leave the current group\n"
+            + "%message - View the content of a certain message\n" + "%groups - View a list of all groups\n"
+            + "%groupjoin - Join a specific group\n" + "%grouppost - Post a message to a specific group\n"
+            + "%groupusers - View a list of all users within a specific group\n" + "%groupleave - Leave a specific group\n"
+            + "%groupmessage - View the content of a message within a specific group\n" + "%help - Repeat this message";
+        System.out.println(helpMessage);
+    }
+
+    // Connect to a server
+    private static Socket connect(String address, int port) {
+        try {
+            Socket socket = new Socket(address, port);
+            System.out.println("Connected to server: " + address + ":" + port);
+
+            return socket;
+        } catch (IOException e) {
+            System.err.println("Error connecting to server: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // Disconnect from a server
+    private static void disconnect(Scanner scanner, Socket socket) {
+        scanner.close();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            System.err.println("Error closing socket: " + e.getMessage());
+        }
+    }
+
+    private static void join()
+
     public static void main(String[] args) {
             // PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             // BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -17,43 +55,24 @@ public class Client {
 
                 switch(command.toLowerCase()) {
                     case "%help":
-                        // Provide a list of all possible commands
-                        String helpMessage = "Commands:\n" + "%connect - Connect to a server\n" + "%exit - Disconnect from the server\n"
-                            + "%join - Join a single message board\n" + "%post - Post a message to a message board\n"
-                            + "%users - View a list of all users in a group\n" + "%leave - Leave the current group\n"
-                            + "%message - View the content of a certain message\n" + "%groups - View a list of all groups\n"
-                            + "%groupjoin - Join a specific group\n" + "%grouppost - Post a message to a specific group\n"
-                            + "%groupusers - View a list of all users within a specific group\n" + "%groupleave - Leave a specific group\n"
-                            + "%groupmessage - View the content of a message within a specific group\n" + "%help - Repeat this message";
-                        System.out.println(helpMessage);
+                        printHelpMessage();
+                        break;
                     case "%exit":
-                        // Disconnect from server
                         System.out.println("Exiting... Goodbye!");
-                        scanner.close();
-                        try {
-                            socket.close();
-                        } catch (IOException e) {
-                            System.err.println("Error closing socket: " + e.getMessage());
-                        }
+                        disconnect(scanner, socket);
                         return;
-
                     case "%connect":
-                        // Connect to a server
+                        // Get address (hostname) and port #
                         System.out.println("Enter the address of the server to connect to: ");
                         String address = scanner.nextLine().trim();
-
                         System.out.println("Enter the port number of the server to connect to: ");
                         int port = Integer.parseInt(scanner.nextLine().trim());
                         
-                        try {
-                            socket = new Socket(address, port);
-                            System.out.println("Connected to server: " + address + ":" + port);
-                        } catch (IOException e) {
-                            System.err.println("Error connecting to server: " + e.getMessage());
-                        }
+                        socket = connect(address, port);
+
                         break;
                     
-                        // Part 1
+                    // Part 1
                     case "%join":
                         // Join the single message board
                         break;
@@ -72,30 +91,31 @@ public class Client {
                         // Retrieve the content of the message
                         // Followed by message ID
                         break;
+                    
                     // Part 2
-                    case "%groups":
-                        // Retrieve a list of all groups that can be joined
-                        break;
-                    case "%groupjoin":
-                        // Join a specific group
-                        // Followed by the group id/name
-                        break;
-                    case "%grouppost":
-                        // Post to a specific group
-                        // Followed by the group id/name, message subject, and message content or main body to post a message to a messaage board owned by a specific group
-                        break;
-                    case "%groupusers":
-                        // Retrieve a list of users in teh given group
-                        // Followed by the group id/name
-                        break;
-                    case "%groupleave":
-                        // Leave a specific group
-                        // Followed by group id/name
-                        break;
-                    case "%groupmessage":
-                        // Retrieve the content of the message posted earlier on a message board owned by a specific group
-                        // Followed by the gruop id/name and message ID
-                        break;
+                    // case "%groups":
+                    //     // Retrieve a list of all groups that can be joined
+                    //     break;
+                    // case "%groupjoin":
+                    //     // Join a specific group
+                    //     // Followed by the group id/name
+                    //     break;
+                    // case "%grouppost":
+                    //     // Post to a specific group
+                    //     // Followed by the group id/name, message subject, and message content or main body to post a message to a messaage board owned by a specific group
+                    //     break;
+                    // case "%groupusers":
+                    //     // Retrieve a list of users in teh given group
+                    //     // Followed by the group id/name
+                    //     break;
+                    // case "%groupleave":
+                    //     // Leave a specific group
+                    //     // Followed by group id/name
+                    //     break;
+                    // case "%groupmessage":
+                    //     // Retrieve the content of the message posted earlier on a message board owned by a specific group
+                    //     // Followed by the gruop id/name and message ID
+                    //     break;
                     default:
                         System.out.println("Unknown command. Available commands: %exit, %connect, %join, %post, %users, %leave, %message, %groups, %groupjoin, %grouppost, %groupusers, %groupleave, %groupmessage.");
                 }
