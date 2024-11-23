@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Server {
@@ -62,7 +63,7 @@ public class Server {
                             messageId = Integer.parseInt(message.split(" ")[1]);
                             out.println(viewMessageContent(messageId));
                         } catch (Exception e) {
-                            out.println("Invalid message ID: " + messageId);
+                            out.println("Invalid message ID.");
                         }
                     } else {
                         out.println("Please provide a message ID after the '%message' command.");
@@ -115,7 +116,7 @@ public class Server {
             synchronized (messageHistory) {
                 Message message = new Message(messageHistory.size() + 1, username, new Date(), content);
                 messageHistory.add(message);
-                notifyAllClients(message);
+                notifyAllClients(message.convertToString());
             }
         }
 
@@ -129,7 +130,35 @@ public class Server {
                 }
             }
         }
+
+    private static class Message {
+        private int id;
+        private String sender;
+        private Date date;
+        private String content;
+
+        public Message(int id, String sender, Date date, String content) {
+            this.id = id;
+            this.sender = sender;
+            this.date = date;
+            this.content = content;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public String convertToString() {
+            return "Message " + id + ", " + sender + ", " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date) + ", " + content;
+        }
     }
+}
+
+    
 
     // private static final int PORT = 5000;
     // private static final List<String> connectedUsers = Collections.synchronizedList(new ArrayList<>());
@@ -274,4 +303,3 @@ public class Server {
     //         users.stream().filter(user -> user != sender).forEach(user -> user.out.println(message));
     //     }
     // }
-}
