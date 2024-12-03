@@ -46,6 +46,13 @@ public class Server {
         private BufferedReader in;
         private String username;
         private final Set<Group> joinedGroups = new HashSet<>();
+        private final String helpMessage = "Commands:\n"
+                            + "%exit - Disconnect from the server\n" + "%post - Post a message to a message board\n"
+                            + "%users - View a list of all users in a group\n" + "%leave - Leave the current group\n"
+                            + "%message - View the content of a certain message\n" + "%groups - View a list of all groups\n"
+                            + "%groupjoin - Join a specific group\n" + "%grouppost - Post a message to a specific group\n"
+                            + "%groupusers - View a list of all users within a specific group\n" + "%groupleave - Leave a specific group\n"
+                            + "%groupmessage - View the content of a message within a specific group\n" + "%help - Repeat this message\n";
 
         public ClientHandler(Socket socket) {
             this.clientSocket = socket;
@@ -68,6 +75,12 @@ public class Server {
                 // Send last 2 messages to new user
                 sendLastMessages(publicGroup);
 
+                // Send current user list for default group
+                sendUserList(groups.get(0));
+
+                // Show list of possible commands
+                out.println(helpMessage);
+
                 // Protocol handling
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
@@ -87,48 +100,71 @@ public class Server {
         }
 
         private void processCommand(String command) throws IOException {
-            String[] parts = command.split(" ", 3);
-            String cmd = parts[0].toLowerCase();
+            // Strip the command keyword from the rest of the command 
+            String[] mainParts = command.split(" ", 2);
+            String cmd = mainParts[0].toLowerCase();
+
+            String[] cmdAuxilary;
 
             switch (cmd) {
                 case "%post":
-                    handlePost(parts[1], parts[2], groups.get(0)); // Default public group
+                    // Get the subject and content from the command
+                    cmdAuxilary = mainParts[1].split(" ", 2);
+
+                    // Check for invalid command format
+                    if (cmdAuxilary.length < 2) {
+                        out.println("Invalid command. Format: '%post <subject> <content>'\n");
+                        break;
+                    }
+
+                    handlePost(cmdAuxilary[0], cmdAuxilary[1], groups.get(0)); // Default public group
                     break;
                 case "%grouppost":
-                    Group group = findGroup(parts[1]);
+                    cmdAuxilary = mainParts[1].split(" ", 3);
+                    if (cmdAuxilary.length < 3) {
+                        out.println("Invalid command. Format: '%grouppost <group_num> <subject> <content>'\n");
+                        break;
+                    }
+
+                    Group group = findGroup(cmdAuxilary[1]);
                     if (group != null) {
-                        handlePost(parts[1], parts[2], group);
+                        handlePost(cmdAuxilary[0], cmdAuxilary[1], group);
                     }
                     break;
                 case "%users":
                     sendUserList(groups.get(0));
                     break;
                 case "%groupusers":
-                    Group targetGroup = findGroup(parts[1]);
+                    Group targetGroup = findGroup(mainParts[1]);
                     if (targetGroup != null) {
                         sendUserList(targetGroup);
                     }
                     break;
                 case "%message":
-                    sendMessageContent(parts[1], groups.get(0));
+                    sendMessageContent(mainParts[1], groups.get(0));
                     break;
                 case "%groupmessage":
-                    Group msgGroup = findGroup(parts[1]);
+                    cmdAuxilary = mainParts[1].split(" ", 2);
+                    if (cmdAuxilary.length < 2) {
+                        out.println("Invalid command. Format: '%groupmessage <group_num> <message_ID>'\n");
+                        break;
+                    }
+                    Group msgGroup = findGroup(cmdAuxilary[0]);
                     if (msgGroup != null) {
-                        sendMessageContent(parts[2], msgGroup);
+                        sendMessageContent(cmdAuxilary[1], msgGroup);
                     }
                     break;
                 case "%groups":
                     sendGroupList();
                     break;
                 case "%groupjoin":
-                    Group joinGroup = findGroup(parts[1]);
+                    Group joinGroup = findGroup(mainParts[1]);
                     if (joinGroup != null) {
                         joinGroup(joinGroup);
                     }
                     break;
                 case "%groupleave":
-                    Group leaveGroup = findGroup(parts[1]);
+                    Group leaveGroup = findGroup(mainParts[1]);
                     if (leaveGroup != null) {
                         leaveGroup(leaveGroup);
                     }
@@ -138,6 +174,12 @@ public class Server {
                     break;
                 case "%exit":
                     clientSocket.close();
+                    break;
+                case "%help":
+                    out.println(helpMessage);
+                    break;
+                default:
+                    out.println("Unknown command. Enter %help to see a list of all possible commands.\n");
                     break;
             }
         }
@@ -163,9 +205,16 @@ public class Server {
 
         private void sendLastMessages(Group group) {
             List<Message> messages = groupMessages.get(group.getId());
-            int start = Math.max(0, messages.size() - 2);
-            for (int i = start; i < messages.size(); i++) {
-                out.println(messages.get(i));
+
+            if (messages.isEmpty()) {
+                out.println("No recent messages.\n");
+            } else {
+                out.println("Recent messages: ");
+                int start = Math.max(0, messages.size() - 2);
+                for (int i = start; i < messages.size(); i++) {
+                    out.println(messages.get(i));
+                }
+                out.println("\n");
             }
         }
 
@@ -174,6 +223,7 @@ public class Server {
             clients.stream()
                 .filter(c -> c.joinedGroups.contains(group))
                 .forEach(c -> out.println(c.username));
+            out.println(); // Print newline
         }
 
         private void sendGroupList() {
@@ -197,19 +247,19 @@ public class Server {
         private void broadcastJoin(String username, Group group) {
             clients.stream()
                 .filter(c -> c.joinedGroups.contains(group))
-                .forEach(c -> c.out.println(username + " joined " + group.getName()));
+                .forEach(c -> c.out.println(username + " joined " + group.getName() + "\n"));
         }
 
         private void broadcastLeave(String username) {
             clients.stream()
                 .filter(c -> c.joinedGroups.contains(groups.get(0)))
-                .forEach(c -> c.out.println(username + " left the public group"));
+                .forEach(c -> c.out.println(username + " left the public group\n"));
         }
 
         private void broadcastLeave(String username, Group group) {
             clients.stream()
                 .filter(c -> c.joinedGroups.contains(group))
-                .forEach(c -> c.out.println(username + " left " + group.getName()));
+                .forEach(c -> c.out.println(username + " left " + group.getName() + "\n"));
         }
 
         private Group findGroup(String groupId) {
@@ -219,6 +269,4 @@ public class Server {
                 .orElse(null);
         }
     }
-
-    // Additional helper classes will be in separate artifacts
 }

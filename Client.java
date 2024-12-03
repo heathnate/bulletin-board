@@ -17,13 +17,14 @@ public class Client {
                 System.out.print("Choose an option: ");
 
                 int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                scanner.nextLine();
 
                 switch (choice) {
                     case 1:
                         connectToServer();
                         break;
                     case 2:
+                        System.out.println("Goodbye!");
                         return;
                 }
             }
