@@ -1,5 +1,6 @@
 import java.util.UUID;
 
+// Helper type
 public class Group {
     private final String id;
     private final String name;
@@ -17,6 +18,7 @@ public class Group {
         return name;
     }
 
+    // Equals operator override
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -25,6 +27,7 @@ public class Group {
         return id.equals(group.id);
     }
 
+    // Overridden hashCode getter
     @Override
     public int hashCode() {
         return id.hashCode();
