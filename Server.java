@@ -144,7 +144,7 @@ public class Server {
 
                     Group group = findGroup(cmdAuxilary[0]);
                     if (group != null) {
-                        handlePost(cmdAuxilary[0], cmdAuxilary[1], group);
+                        handlePost(cmdAuxilary[1], cmdAuxilary[2], group);
                     }
                     break;
                 // Handle getting users in public group
@@ -259,6 +259,7 @@ public class Server {
                 // Broadcast leave event if group successfully removed
                 broadcastLeave(username, group);
             }
+            out.println("You have left " + group.getName());
         }
 
         // Method to send last 2 messages upon group join
