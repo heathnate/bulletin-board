@@ -1,7 +1,8 @@
-Nate Heath and Kene Anosike
+This project was completed as the final project of CS4065 - Computer Networks and Networked Computing.
+I used Java, paired with functional programming and OOP concepts, to implement a client and server for the bulletin board.
 
 PROGRAM COMPILATION/RUN INSTRUCTIONS
-    1. In order to run Java within VS Code - our preferred method - you must have a JDK installed. If you don't already have one, you can   find more information about it here: https://code.visualstudio.com/docs/languages/java
+    1. In order to run Java within VS Code - our preferred method - you must have a JDK installed. If you don't already have one, you can find more information about it here: https://code.visualstudio.com/docs/languages/java
     2. Next, right click the ZIP folder submission in your File Explorer and extract them to a separate, unzipped folder.
     3. Open VSCode and open the newly created folder using the "File" option in the top left.
     4. Run the Server.java file first by either clicking the Run button in the top right or enter the following:
@@ -11,8 +12,3 @@ PROGRAM COMPILATION/RUN INSTRUCTIONS
         "javac Client.java"
         "java Client"
     6. For testing multiple connected clients, simply run the Client.java file multiple times with the server running.
-
-Discussion of Issues Encountered
-    1. The first issue our group ran into was what seemed like a simple input issue. We were trying to read the username inputted by the user, but for some reason the in.readNext() method wouldn't read the first line, but rather the second. So, the user would have to press Enter, then add the username, then press Enter again. This isn't a massive issue but it was extremely annoying that we couldn't do anything to change it. Eventually, we scrapped trying to change the issue head on and just rewrote the entire run() method, which ended up fixing it.
-    2. The second issue our group ran into was communicating between the client and server. In the first implementation of our program, we we correctly communicating from the client side (as in, we were correctly sending the commands to the server). However, our server was unable to read any commands from the client after we got the username from the client. It turns out the socket connecting the client and server was getting closed after we got the username from the client. However, it was really puzzling as to why the socket was being closed. This was another case where we ended up having to completely scrap our code and start fresh.
-    3. The third issue our group encountered was implementing all of the helper functions in the Server class that use the stream() method. We found mention of the stream() method on Stack Overflow and decided to try to use it. However, the documentation around it was complicated and neither of us had ever used the stream() method before. We used Stack Overflow examples, the documentation, Geeks for Geeks, and ChatGPT to help us figure out how to implement the method.
